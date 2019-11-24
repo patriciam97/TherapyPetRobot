@@ -84,12 +84,12 @@ def read_touchsensor():
         time.sleep(0.02)
 
 def main():
-    # while True:
-    #     print("Measured distance = %.1f cm" % distance())
+
     distance_thread = threading.Thread(target=distance)
-    distance_thread .start()
-    # automatic_thread = threading.Thread(target=automatic)
-    # automatic_thread.start()
+    automatic_thread = threading.Thread(target=automatic)
+    automatic_thread.start()
+    distance_thread.start()
+
     read_touchsensor()
     # touchsensor_thread = threading.Thread(target=read_touchsensor)
     # touchsensor_thread.start()
