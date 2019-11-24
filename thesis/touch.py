@@ -21,18 +21,21 @@ p.start(0)                  # Starts running PWM on the pin and sets it to 0
 overall_state = {"sensor_moved": False, "last_moved": time.time(), "touchstatus":False, "alternate": False, "motor": p}
 
 def distance():
-    GPIO.output(distance_trigger,True)
-    time.sleep(0.0000001)
-    GPIO.output(distance_trigger,False)
-    start_time = time.time()
-    stop_time = time.time()
-    while GPIO.input(distance_echo) == 0:
+    while True:
+        GPIO.output(distance_trigger,True)
+        time.sleep(0.5)
+        GPIO.output(distance_trigger,False)
         start_time = time.time()
-    while GPIO.input(distance_echo) == 1:
         stop_time = time.time()
-    time_elapsed = stop_time - start_time
-    distance = (time_elapsed * 34300)/2
-    return distance
+        while GPIO.input(distance_echo) == 0:
+            start_time = time.time()
+        while GPIO.input(distance_echo) == 1:
+            stop_time = time.time()
+        time_elapsed = stop_time - start_time
+        distance = (time_elapsed * 34300)/2
+        if distance <= 10:
+            print("BARK SOUND")
+            time.sleep(0.3)
 
 def setAngle(angle):
     global overall_state
@@ -81,11 +84,13 @@ def read_touchsensor():
         time.sleep(0.02)
 
 def main():
-    while True:
-        print(distance())
+    # while True:
+    #     print("Measured distance = %.1f cm" % distance())
+    distance_thread = threading.Thread(target=distance)
+    distance_thread .start()
     # automatic_thread = threading.Thread(target=automatic)
     # automatic_thread.start()
-    # read_touchsensor()
+    read_touchsensor()
     # touchsensor_thread = threading.Thread(target=read_touchsensor)
     # touchsensor_thread.start()
 
