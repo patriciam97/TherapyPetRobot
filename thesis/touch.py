@@ -9,16 +9,26 @@ touch = 2
 motor = 3
 distance_echo = 14
 distance_trigger = 15
+vibration_sensor = 26
 GPIO.setwarnings(True)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(touch,GPIO.IN,pull_up_down=GPIO.PUD_UP)
 GPIO.setup(motor,GPIO.OUT)  # Sets up pin 11 to an output (instead of an input)
 GPIO.setup(distance_echo,GPIO.IN)
 GPIO.setup(distance_trigger,GPIO.OUT)
+GPIO.setup(vibration_sensor, GPIO.IN)
 p = GPIO.PWM(motor, 50)     # Sets up pin 11 as a PWM pin
 p.start(0)                  # Starts running PWM on the pin and sets it to 0
 
 overall_state = {"sensor_moved": False, "last_moved": time.time(), "touchstatus":False, "alternate": False, "motor": p}
+
+def callback_vibration(channel):
+        if GPIO.input(channel):
+                print ("Movement Detected!")
+        else:
+                print ("Movement Detected!")
+GPIO.add_event_detect(vibration_sensor, GPIO.BOTH, bouncetime=300)  # let us know when the pin 26 goes HIGH or LOW
+GPIO.add_event_callback(vibration_sensor, callback_vibration)  # assign function to GPIO PIN 26, Run function on change
 
 def distance():
     while True:
@@ -54,7 +64,7 @@ def move():
         #     setAngle(30)
         # else:
         #     print("off")
-        setAngle(0 if overall_state["alternate"] else 80)
+        setAngle(0 if overall_state["alternate"] else 90)
         overall_state["alternate"]= not overall_state["alternate"]
         randtime-=1
         time.sleep(0.5)
@@ -89,7 +99,6 @@ def main():
     automatic_thread = threading.Thread(target=automatic)
     automatic_thread.start()
     distance_thread.start()
-
     read_touchsensor()
     # touchsensor_thread = threading.Thread(target=read_touchsensor)
     # touchsensor_thread.start()
