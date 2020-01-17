@@ -1,0 +1,50 @@
+import RPi.GPIO as GPIO
+import time
+import os
+from time import sleep   # Imports sleep (aka wait or pause) into the program
+
+touch = 2
+motor = 3
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(touch,GPIO.IN,pull_up_down=GPIO.PUD_UP)
+GPIO.setup(motor,GPIO.OUT)  # Sets up pin 11 to an output (instead of an input)
+p = GPIO.PWM(motor, 50)     # Sets up pin 11 as a PWM pin
+touchstatus = False
+p.start(0)               # Starts running PWM on the pin and sets it to 0
+
+def setAngle(angle):
+	duty = angle / 18 + 2
+	p.ChangeDutyCycle(duty)
+	sleep(2)
+    
+def read_touchsensor():
+    global touchstatus
+    if (GPIO.input(touch)==True):
+            touchstatus = not touchstatus
+            if touchstatus:
+                print("on")
+                setAngle(0)
+            else:
+                print("off")
+                setAngle(40)
+
+
+def main():
+#    print ("Reseting ...")
+ #   setAngle(0)
+  #  setAngle(180)
+   # print("Done")
+    while True:
+        read_touchsensor()
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        p.stop()
+        GPIO.cleanup()
+    else:
+        p.stop()
+        GPIO.cleanup()
