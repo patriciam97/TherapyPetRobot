@@ -5,7 +5,7 @@ import os
 from time import sleep   # Imports sleep (aka wait or pause) into the program
 import random
 import threading
-from sounds import get_sound 
+import get_sound 
 
 # set up of pins
 touch = 14
@@ -37,25 +37,31 @@ GPIO.add_event_detect(vibration_sensor, GPIO.BOTH, bouncetime=300)  # let us kno
 GPIO.add_event_callback(vibration_sensor, callback_vibration)  # assign function to GPIO PIN 26, Run function on change
 
 def handle_barks(state):
+    print("here")
     global overall_state
-    overall_state["music_writing"]=state
+    overall_state["music_writing"] = state
     get_sound.get_new_sound(state)
-    overall_state["music_writing"]=None
+    overall_state["music_writing"] = None
     print("Sound for state"+state+" updated.")
 
 def bark():
     global overall_state
-    if overall_state["music_writing"]!= overall_state["state"]:
+    if overall_state["music_writing"] is not overall_state["state"]:
+    # if overall_state["music_writing"] is None:
         overall_state["music_busy"] = not overall_state["music_busy"]
         current_state = overall_state["state"]
         pygame.mixer.init()
         title = "/home/pi/Documents/TherapyPetRobot/thesis/sounds/new/sound_"+str(overall_state["state"])+".wav"
         pygame.mixer.music.load(title)  
-        pygame.mixer.music.play()
-        pygame.mixer.music.fadeout(1000)
-        overall_state["music_busy"] = not overall_state["music_busy"]
         new_barks_thread = threading.Thread(target=handle_barks,args=(current_state,))
         new_barks_thread.start()
+        pygame.mixer.music.play()
+        pygame.mixer.music.fadeout(1000)
+        # while pygame.mixer.music.get_busy:
+        #     print("music busy")
+        overall_state["music_busy"] = not overall_state["music_busy"]
+        # new_barks_thread = threading.Thread(target=handle_barks,args=(current_state,))
+        # new_barks_thread.start()
 
     
 
@@ -113,7 +119,7 @@ def automatic():
         if overall_state["sensor_moved"]:
             time.sleep(1)
             continue
-        if time.time() - overall_state["last_moved"] > 7:
+        if time.time() - overall_state["last_moved"] > 30:
             print("GO CRAZY")
             move_tail()
             time.sleep(2)
