@@ -1,9 +1,11 @@
 from scipy.io import wavfile
 import wave,struct,random
 
-# sampling_rate, audio = wavfile.read('/home/pi/Documents/TherapyPetRobot/thesis/sounds/labrador-barking-daniel_simon.wav')
-sampling_rate_normal, audio_normal = wavfile.read('sounds/labrador-barking-daniel_simon.wav')
-sampling_rate_scared, audio_scared = wavfile.read('sounds/crying_dog.wav')
+sampling_rate_normal, audio_normal = wavfile.read('/home/pi/Documents/TherapyPetRobot/thesis/sounds/labrador-barking-daniel_simon.wav')
+sampling_rate_scared, audio_scared = wavfile.read('/home/pi/Documents/TherapyPetRobot/thesis/sounds/crying_dog.wav')
+# 
+# sampling_rate_normal, audio_normal = wavfile.read('sounds/labrador-barking-daniel_simon.wav')
+# sampling_rate_scared, audio_scared = wavfile.read('sounds/crying_dog.wav')
 
 def get_random(audio,status):
     length = len(audio)
@@ -27,8 +29,8 @@ def get_interval_array_elems(arr,interval):
     return(new_arr)
 
 def create_sound(sound,status):
-    # title = '/home/pi/Documents/TherapyPetRobot/thesis/sounds/new/sound_'+str(status)+'.wav'
-    title = 'sounds/new/sound_'+str(status)+'.wav'
+    title = '/home/pi/Documents/TherapyPetRobot/thesis/sounds/new/sound_'+str(status)+'.wav'
+    # title = 'sounds/new/sound_'+str(status)+'.wav'
     noise_output = wave.open(title, 'wb')
     noise_output.setparams((2, 2, 44100, 0, 'NONE', 'not compressed'))
     print("Writing the wav file for state "+str(status))

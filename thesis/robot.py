@@ -22,7 +22,7 @@ GPIO.setup(vibration_sensor, GPIO.IN)
 p = GPIO.PWM(servo_motor_pin, 50)     # Sets up pin 11 as a PWM pin
 p.start(0)                  # Starts running PWM on the pin and sets it to 0
 
-overall_state = {"state":2,"tail_moves": False, "last_pet":time.time(),"last_tail_moved": time.time(), "touchstatus":False, "tail_alternate": False, "motor": p,"music_busy":False,"music_writing":None,"last_bark":time.time()}
+overall_state = {"state":5,"tail_moves": False, "last_pet":time.time(),"last_tail_moved": time.time(), "touchstatus":False, "tail_alternate": False, "motor": p,"music_busy":False,"music_writing":None,"last_bark":time.time()}
 
 def handle_barks(state):
     print("here")
@@ -31,6 +31,29 @@ def handle_barks(state):
     get_sound.get_new_sound(state)
     overall_state["music_writing"] = None
     print("Sound for state"+state+" updated.")
+
+# def bark():
+#     global overall_state
+#     while True:
+#         if overall_state["music_writing"] is not overall_state["state"] and overall_state["music_busy"] == True and time.time()-overall_state['last_bark']>7:
+        #     overall_state['last_bark']=time.time()
+        # # if overall_state["music_writing"] is None:
+        #     overall_state["music_busy"] = not overall_state["music_busy"]
+        #     current_state = overall_state["state"]
+        #     pygame.mixer.init()
+        #     title = "/home/pi/Documents/TherapyPetRobot/thesis/sounds/new/sound_"+str(overall_state["state"])+".wav"
+        #     sound = pygame.mixer.Sound(title)  
+        #     # new_barks_thread = threading.Thread(target=handle_barks,args=(current_state,))
+        #     # new_barks_thread.start()
+        #     # pygame.mixer.music.play(1,1,1)
+        #     pygame.mixer.music.set_volume(0.2)
+        #     pygame.mixer.Sound.play(sound,0,0,3)
+        #     # pygame.mixer.music.fadeout(1000)
+        #     # while pygame.mixer.music.get_busy:
+        #     #     print("music busy")
+        #     # overall_state["music_busy"] = not overall_state["music_busy"]
+        #     # new_barks_thread = threading.Thread(target=handle_barks,args=(current_state,))
+        #     # new_barks_thread.start()
 
 def bark():
     global overall_state
@@ -45,6 +68,7 @@ def bark():
             pygame.mixer.music.load(title)  
             # new_barks_thread = threading.Thread(target=handle_barks,args=(current_state,))
             # new_barks_thread.start()
+            pygame.mixer.music.set_volume(0.2)
             pygame.mixer.music.play()
             # pygame.mixer.music.fadeout(1000)
             # while pygame.mixer.music.get_busy:
@@ -56,19 +80,19 @@ def bark():
 def handle_state():
     global overall_state
     while True:
-        if time.time()-overall_state["last_pet"]>20 and overall_state["state"]>2:
+        if time.time()-overall_state["last_pet"]>20 and overall_state["state"]>1:
             # every 20 second state drops
             overall_state["state"]-=1
             print("State dropped to "+str(overall_state["state"]))
 
 
-def callback_vibration(channel):
-        if GPIO.input(channel):
-                print ("Movement Detected!")
-        else:
-                print ("Movement Detected!")
-GPIO.add_event_detect(vibration_sensor, GPIO.BOTH, bouncetime=300)  # let us know when the pin 26 goes HIGH or LOW
-GPIO.add_event_callback(vibration_sensor, callback_vibration)  # assign function to GPIO PIN 26, Run function on change
+# def callback_vibration(channel):
+#         if GPIO.input(channel):
+#                 print ("Movement Detected!")
+#         else:
+#                 print ("Movement Detected!")
+# GPIO.add_event_detect(vibration_sensor, GPIO.BOTH, bouncetime=300)  # let us know when the pin 26 goes HIGH or LOW
+# GPIO.add_event_callback(vibration_sensor, callback_vibration)  # assign function to GPIO PIN 26, Run function on change
 
 def distance():
     # function to detect objects within an x distance
@@ -118,7 +142,7 @@ def automatic_tail():
         if overall_state["tail_moves"]:
             time.sleep(1)
             continue
-        if time.time() - overall_state["last_tail_moved"] > 7:
+        if time.time() - overall_state["last_tail_moved"] > 15:
             print("GO CRAZY")
             move_tail()
             time.sleep(2)
@@ -130,6 +154,8 @@ def read_touchsensor():
     global overall_state, touch
     while True:
         if (GPIO.input(capacitive_touch_sensor_pin)):
+            if overall_state["state"]<10:
+                overall_state["state"]+=1
             overall_state["tail_moves"] = True
             move_tail()
             overall_state["tail_moves"] = False
@@ -137,7 +163,6 @@ def read_touchsensor():
         time.sleep(0.02)
 
 def main():
-
     # distance_thread = threading.Thread(target=distance)
     automatic_thread = threading.Thread(target=automatic_tail)
     automatic_thread.start()
