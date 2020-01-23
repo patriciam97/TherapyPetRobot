@@ -5,7 +5,7 @@ sampling_rate, audio = wavfile.read('/home/pi/Documents/TherapyPetRobot/thesis/s
 
 def get_random(audio,status):
     length = len(audio)
-    min_duration = 500000
+    min_duration = 600000
     # if status>=8:
     #     min_duration = 500000  
     start = random.randint(0, length)
