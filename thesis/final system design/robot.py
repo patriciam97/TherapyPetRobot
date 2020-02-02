@@ -36,8 +36,8 @@ class Robot :
         p.start(0)                  # Starts running PWM on the pin and sets it to 0
         automatic_thread = threading.Thread(target=self.automatic_tail)
         automatic_thread.start()
-        # bark_thread = threading.Thread(target=bark)
-        # bark_thread.start()
+        bark_thread = threading.Thread(target=bark)
+        bark_thread.start()
         self.read_touchsensor()
         try:
             # main()
