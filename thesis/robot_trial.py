@@ -70,6 +70,7 @@ def read_left_touchsensor():
     global overall_state
     while True:
         if (GPIO.input(left_capacitive_touch_sensor_pin)):
+            print("touched")
             if overall_state["state"]<10:
                 overall_state["state"]+=1
             overall_state["tail_moves"] = True
@@ -82,6 +83,7 @@ def read_right_touchsensor():
     global overall_state
     while True:
         if (GPIO.input(right_capacitive_touch_sensor_pin)):
+            print("touched")
             if overall_state["state"]<10:
                 overall_state["state"]+=1
             overall_state["tail_moves"] = True
