@@ -63,7 +63,8 @@ def automatic_tail():
             move_tail()
             time.sleep(2)
             overall_state["last_tail_moved"] = time.time()
-        time.sleep(0.05)
+            continue
+        time.sleep(0.2)
         print("Waiting...")
 
 def read_left_touchsensor():
@@ -77,7 +78,7 @@ def read_left_touchsensor():
             move_tail()
             overall_state["tail_moves"] = False
             overall_state["last_tail_moved"] = time.time()
-        time.sleep(0.02)
+        time.sleep(0.2)
 
 def read_right_touchsensor():
     global overall_state,right_capacitive_touch_sensor_pin
@@ -90,7 +91,7 @@ def read_right_touchsensor():
             move_tail()
             overall_state["tail_moves"] = False
             overall_state["last_tail_moved"] = time.time()
-        time.sleep(0.02)
+        time.sleep(0.2)
 
 def main():
 
@@ -101,10 +102,11 @@ def main():
     left_touch_sensor_thread = threading.Thread(target = read_left_touchsensor)
     left_touch_sensor_thread.start()
     
-    # right_touch_sensor_thread = threading.Thread(target = read_right_touchsensor)
-    # right_touch_sensor_thread.start()
+    right_touch_sensor_thread = threading.Thread(target = read_right_touchsensor)
+    right_touch_sensor_thread.start()
+    
     while True:
-        pass
+        time.sleep(1)
 
 if __name__ == '__main__':
     try:
