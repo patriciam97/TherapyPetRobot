@@ -46,7 +46,7 @@ def move_tail():
     while randtime > 0:
         print(randtime)
         overall_state["touchstatus"] = not overall_state["touchstatus"]
-        set_tail_angle(0 if overall_state["tail_alternate"] else 90)
+        set_tail_angle(0 if overall_state["tail_alternate"] else 50)
         overall_state["tail_alternate"]= not overall_state["tail_alternate"]
         randtime-=1
         time.sleep(0.5)
