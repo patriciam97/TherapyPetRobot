@@ -94,8 +94,8 @@ def read_right_touchsensor():
 
 def main():
 
-    # automatic_thread = threading.Thread(target=automatic_tail)
-    # automatic_thread.start()
+    automatic_thread = threading.Thread(target=automatic_tail)
+    automatic_thread.start()
 
 
     left_touch_sensor_thread = threading.Thread(target = read_left_touchsensor)
