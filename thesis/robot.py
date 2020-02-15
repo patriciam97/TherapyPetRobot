@@ -7,7 +7,7 @@ import random
 import threading
 import get_sound 
 
-capacitive_touch_sensor_pin = 14
+capacitive_touch_sensor_pin = 17
 servo_motor_pin = 15
 distance_echo_pin = 20
 distance_trigger_pin = 16
@@ -154,6 +154,7 @@ def read_touchsensor():
     global overall_state, touch
     while True:
         if (GPIO.input(capacitive_touch_sensor_pin)):
+            print("touched")
             if overall_state["state"]<10:
                 overall_state["state"]+=1
             overall_state["tail_moves"] = True
