@@ -6,7 +6,7 @@ from time import sleep   # Imports sleep (aka wait or pause) into the program
 import random
 import threading
 
-left_capacitive_touch_sensor_pin = 15
+left_capacitive_touch_sensor_pin = 17
 right_capacitive_touch_sensor_pin = 18
 servo_motor_pin = 14
 
@@ -67,7 +67,7 @@ def automatic_tail():
         print("Waiting...")
 
 def read_left_touchsensor():
-    global overall_state
+    global overall_state,left_capacitive_touch_sensor_pin
     while True:
         if (GPIO.input(left_capacitive_touch_sensor_pin)):
             print("touched")
@@ -80,7 +80,7 @@ def read_left_touchsensor():
         time.sleep(0.02)
 
 def read_right_touchsensor():
-    global overall_state
+    global overall_state,right_capacitive_touch_sensor_pin
     while True:
         if (GPIO.input(right_capacitive_touch_sensor_pin)):
             print("touched")
