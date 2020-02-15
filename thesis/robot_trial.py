@@ -13,8 +13,8 @@ servo_motor_pin = 14
 GPIO.setwarnings(True)
 GPIO.setmode(GPIO.BCM)
 
-GPIO.setup(left_capacitive_touch_sensor_pin,GPIO.IN,pull_up_down=GPIO.PUD_UP)
-GPIO.setup(right_capacitive_touch_sensor_pin,GPIO.IN,pull_up_down=GPIO.PUD_UP)
+GPIO.setup(left_capacitive_touch_sensor_pin,GPIO.IN)
+GPIO.setup(right_capacitive_touch_sensor_pin,GPIO.IN)
 
 GPIO.setup(servo_motor_pin,GPIO.OUT)  # Sets up pin 11 to an output (instead of an input)
 
