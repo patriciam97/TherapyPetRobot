@@ -101,8 +101,8 @@ def main():
     left_touch_sensor_thread = threading.Thread(target = read_left_touchsensor)
     left_touch_sensor_thread.start()
     
-    right_touch_sensor_thread = threading.Thread(target = read_right_touchsensor)
-    right_touch_sensor_thread.start()
+    # right_touch_sensor_thread = threading.Thread(target = read_right_touchsensor)
+    # right_touch_sensor_thread.start()
 
 
 if __name__ == '__main__':
