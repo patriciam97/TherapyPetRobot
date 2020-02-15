@@ -10,7 +10,7 @@ left_capacitive_touch_sensor_pin = 17
 right_capacitive_touch_sensor_pin = 18
 servo_motor_pin = 14
 
-GPIO.setwarnings(True)
+GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 
 GPIO.setup(left_capacitive_touch_sensor_pin,GPIO.IN,pull_up_down=GPIO.PUD_UP)
@@ -94,8 +94,8 @@ def read_right_touchsensor():
 
 def main():
 
-    automatic_thread = threading.Thread(target=automatic_tail)
-    automatic_thread.start()
+    # automatic_thread = threading.Thread(target=automatic_tail)
+    # automatic_thread.start()
 
 
     left_touch_sensor_thread = threading.Thread(target = read_left_touchsensor)
@@ -103,7 +103,8 @@ def main():
     
     # right_touch_sensor_thread = threading.Thread(target = read_right_touchsensor)
     # right_touch_sensor_thread.start()
-
+    while True:
+        pass
 
 if __name__ == '__main__':
     try:
