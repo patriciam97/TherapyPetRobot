@@ -5,6 +5,8 @@ import os
 from time import sleep   # Imports sleep (aka wait or pause) into the program
 import random
 import threading
+import get_sound 
+
 
 left_capacitive_touch_sensor_pin = 17
 right_capacitive_touch_sensor_pin = 18
@@ -93,11 +95,40 @@ def read_right_touchsensor():
             overall_state["last_tail_moved"] = time.time()
         time.sleep(0.2)
 
+def handle_barks(state):
+    print("here")
+    global overall_state
+    overall_state["music_writing"] = state
+    get_sound.get_new_sound(state)
+    overall_state["music_writing"] = None
+    print("Sound for state"+state+" updated.")
+
+def bark():
+    global overall_state
+    while True:
+        if (overall_state["music_writing"] is not overall_state["state"]) and (overall_state["music_busy"] == False and time.time()-overall_state['last_bark']>7):
+            overall_state['last_bark']=time.time()
+            overall_state["music_busy"] = not overall_state["music_busy"]
+            current_state = overall_state["state"]
+            pygame.mixer.init()
+            title = "/home/pi/Documents/TherapyPetRobot/thesis/sounds/new/sound_"+str(overall_state["state"])+".wav"
+            pygame.mixer.music.load(title)  
+            new_barks_thread = threading.Thread(target=handle_barks,args=(current_state,))
+            new_barks_thread.start()
+            pygame.mixer.music.set_volume(0.2)
+            pygame.mixer.music.play()
+            # pygame.mixer.music.fadeout(1000)
+            # while pygame.mixer.music.get_busy:
+            #     print("music busy")
+            # overall_state["music_busy"] = not overall_state["music_busy"]
+            # new_barks_thread = thread
 def main():
 
     # automatic_thread = threading.Thread(target=automatic_tail)
     # automatic_thread.start()
 
+    bark_thread = threading.Thread(target=bark)
+    bark_thread.start()
 
     left_touch_sensor_thread = threading.Thread(target = read_left_touchsensor)
     left_touch_sensor_thread.start()
