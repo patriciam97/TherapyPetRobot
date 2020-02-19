@@ -37,7 +37,7 @@ def create_sound(sound,status):
     mapping = {
         0 : 1,
         1 : 1.2,
-        2:  7,
+        2:  8,
         3 : 3,
         4 : 1,
         5 : 1,
