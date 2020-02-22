@@ -5,7 +5,7 @@ import os
 from time import sleep   # Imports sleep (aka wait or pause) into the program
 import random
 import threading
-import get_sound 
+import get_sound2
 
 
 left_capacitive_touch_sensor_pin = 17
@@ -23,16 +23,18 @@ GPIO.setup(servo_motor_pin,GPIO.OUT)  # Sets up pin 11 to an output (instead of 
 p = GPIO.PWM(servo_motor_pin, 50)     # Sets up pin 11 as a PWM pin
 p.start(0)                  # Starts running PWM on the pin and sets it to 0
 
-overall_state = {"state":5,"tail_moves": False, "last_pet":time.time(),"last_tail_moved": time.time(), "touchstatus":False, "tail_alternate": False, "motor": p,"music_busy":False,"music_writing":None,"last_bark":time.time()}
-
+overall_state = {"state":0,"tail_moves": False, "last_pet":time.time(),"last_tail_moved": time.time(), "touchstatus":False, "tail_alternate": False, "motor": p,"music_busy":False,"music_writing":None,"last_bark":time.time()}
+thread_state= {"main_running": False, "state_thread":None,"bark_thread":None,"left_touch_sensor_thread":None,"right_touch_sensor_thread":None}
 
 def handle_state():
-    global overall_state
-    while True:
-        if time.time()-overall_state["last_pet"]>20 and overall_state["state"]>1:
+    global overall_state, thread_state
+    while thread_state["main_running"]:
+        secs = random.randint(50, 200)
+        if time.time()-overall_state["last_pet"]>secs and overall_state["state"]>1:
             # every 20 second state drops
             overall_state["state"]-=1
             print("State dropped to "+str(overall_state["state"]))
+        time.sleep(2)
 
 
 def set_tail_angle(angle):
@@ -45,6 +47,7 @@ def move_tail():
     global overall_state
     randtime = random.randint(4,10)
     overall_state["music_busy"]=not overall_state["music_busy"]
+    print(overall_state["music_busy"])
     while randtime > 0:
         print(randtime)
         overall_state["touchstatus"] = not overall_state["touchstatus"]
@@ -55,8 +58,8 @@ def move_tail():
     overall_state["music_busy"] = not overall_state["music_busy"]
 
 def automatic_tail():
-    global overall_state
-    while True:
+    global overall_state, thread_state
+    while thread_state["main_running"]:
         if overall_state["tail_moves"]:
             time.sleep(1)
             continue
@@ -70,11 +73,12 @@ def automatic_tail():
         print("Waiting...")
 
 def read_left_touchsensor():
-    global overall_state,left_capacitive_touch_sensor_pin
-    while True:
+    global overall_state,left_capacitive_touch_sensor_pin, thread_state
+    while thread_state["main_running"]:
         if (GPIO.input(left_capacitive_touch_sensor_pin)):
             print("touched")
-            if overall_state["state"]<10:
+            if overall_state["state"]<6 and time.time() - overall_state["last_tail_moved"]>2:
+                print("State increased to "+str(overall_state["state"]))
                 overall_state["state"]+=1
             overall_state["tail_moves"] = True
             move_tail()
@@ -83,11 +87,12 @@ def read_left_touchsensor():
         time.sleep(0.2)
 
 def read_right_touchsensor():
-    global overall_state,right_capacitive_touch_sensor_pin
-    while True:
+    global overall_state,right_capacitive_touch_sensor_pin, thread_state
+    while thread_state["main_running"]:
         if (GPIO.input(right_capacitive_touch_sensor_pin)):
             print("touched")
-            if overall_state["state"]<10:
+            if overall_state["state"]<6 and time.time() - overall_state["last_tail_moved"]>2:
+                print("State increased to "+str(overall_state["state"]))
                 overall_state["state"]+=1
             overall_state["tail_moves"] = True
             move_tail()
@@ -96,44 +101,54 @@ def read_right_touchsensor():
         time.sleep(0.2)
 
 def handle_barks(state):
-    print("here")
     global overall_state
     overall_state["music_writing"] = state
-    get_sound.get_new_sound(state)
+    get_sound2.get_new_sound(state)
     overall_state["music_writing"] = None
-    print("Sound for state"+state+" updated.")
+    print("Sound for state"+str(state)+" updated.")
 
 def bark():
-    global overall_state
-    while True:
-        if (overall_state["music_writing"] is not overall_state["state"]) and (overall_state["music_busy"] == False and time.time()-overall_state['last_bark']>7):
+    global overall_state, thread_state
+    while thread_state["main_running"]:
+        if (overall_state["state"] in range(0,7)) and(overall_state["music_writing"] is not overall_state["state"]) and (overall_state["music_busy"] == True):
+            print("Playing "+str(overall_state["state"]))
             overall_state['last_bark']=time.time()
             overall_state["music_busy"] = not overall_state["music_busy"]
             current_state = overall_state["state"]
             pygame.mixer.init()
             title = "/home/pi/Documents/TherapyPetRobot/thesis/sounds/new/sound_"+str(overall_state["state"])+".wav"
+            
             pygame.mixer.music.load(title)  
             new_barks_thread = threading.Thread(target=handle_barks,args=(current_state,))
             new_barks_thread.start()
-            pygame.mixer.music.set_volume(0.2)
+            pygame.mixer.music.set_volume(1)
             pygame.mixer.music.play()
-            # pygame.mixer.music.fadeout(1000)
+            # pygame.mixer.music.fadeout(100)
             # while pygame.mixer.music.get_busy:
             #     print("music busy")
             # overall_state["music_busy"] = not overall_state["music_busy"]
             # new_barks_thread = thread
 def main():
-
+    global thread_state
+    thread_state["main_running"] = True
     # automatic_thread = threading.Thread(target=automatic_tail)
     # automatic_thread.start()
 
+    state_thread = threading.Thread(target=handle_state)
+    thread_state["state_thread"]=state_thread
+    state_thread.start()
+
     bark_thread = threading.Thread(target=bark)
+    thread_state["bark_thread"]=bark_thread
     bark_thread.start()
 
     left_touch_sensor_thread = threading.Thread(target = read_left_touchsensor)
+    thread_state["left_touch_sensor_thread"]=left_touch_sensor_thread
     left_touch_sensor_thread.start()
     
     right_touch_sensor_thread = threading.Thread(target = read_right_touchsensor)
+    thread_state["right_touch_sensor_thread"]=right_touch_sensor_thread
+
     right_touch_sensor_thread.start()
     
     while True:
@@ -143,6 +158,9 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
+        thread_state["main_running"] = False
+        for state in range(7):
+            get_sound2.get_new_sound(state)
         p.stop()
         GPIO.cleanup()
     else:
