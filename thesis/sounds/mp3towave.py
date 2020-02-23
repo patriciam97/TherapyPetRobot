@@ -13,4 +13,6 @@ sound = AudioSegment.from_mp3(src)
 # print(np.where(sound2 == 26606))
 # print(np.where(sound2 == ))
 sound = sound[0:7000]
+sound=sound+12
 sound.export(dst, format="wav")
+ 
