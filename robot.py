@@ -72,14 +72,16 @@ def automatic_tail():
         if overall_state["tail_moves"]:
             time.sleep(1)
             continue
-        if time.time() - overall_state["last_tail_moved"] > 15:
-            print("GO CRAZY")
-            overall_state["bark"]= True
-            overall_state["heartbeat"]= False
-            move_tail()
-            time.sleep(2)
-            overall_state["last_tail_moved"] = time.time()
-            continue
+        if (time.time() - overall_state["last_pet"] > 60) and (overall_state["bark"]==False and overall_state["heartbeat"]==False ):
+            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.8,0.2])
+            print(bark_sound_probability)
+            if (bark_sound_probability == "bark"):
+                overall_state["bark"]= True
+                overall_state["heartbeat"]= False
+                move_tail()
+            else:
+                overall_state["heartbeat"]= True
+                overall_state["bark"]= False
         time.sleep(0.2)
         print("Waiting...")
 
@@ -150,7 +152,6 @@ def heartbeat_sound():
             overall_state["music_busy"] = True
             title = "/home/pi/Documents/TherapyPetRobot/sounds/heartbeat2"+".wav"
             pygame.mixer.music.load(title)
-            pygame.mixer.music.set_volume(100)
             pygame.mixer.music.play()
             time.sleep(random.randint(5, 10))
             overall_state["music_busy"] = False
@@ -169,19 +170,22 @@ def bark():
             overall_state["music_busy"] = True
             current_state = overall_state["state"]
             title = "/home/pi/Documents/TherapyPetRobot/sounds/new/sound_"+str(overall_state["state"])+".wav"
-            pygame.mixer.music.load(title)  
+            a = pygame.mixer.Sound(title)
+            pygame.mixer.Sound.play(a,fade_ms=800)
+            pygame.mixer.music.fadeout(100)
             new_barks_thread = threading.Thread(target=handle_barks,args=(current_state,))
             new_barks_thread.start()
             pygame.mixer.music.set_volume(1)
-            pygame.mixer.music.play()
-            # pygame.mixer.music.fadeout(100)
-            # while pygame.mixer.music.get_busy:
-            #     pass
-                # print("barking sound")
-            # time.sleep(random.randint(10, 20))
-            # overall_state["music_busy"] = False
-            # overall_state["bark"] = False
-            # overall_state["tail_moves"] = False
+            if (a.get_length()>3):
+                sleep_counter = random.randint(3, int(a.get_length()))
+            else:
+                sleep_counter = 3
+            print(sleep_counter)
+            time.sleep(sleep_counter)
+            print("DONE")
+            overall_state["music_busy"] = False
+            overall_state["bark"] = False
+            overall_state["tail_moves"] = False
 def main():
     global thread_state
     thread_state["main_running"] = True
@@ -215,16 +219,8 @@ def main():
     while True:
         if overall_state["just_started"]:
             overall_state["bark"]=True
-            time.sleep(4)
-            overall_state["bark"]=False
-            overall_state["music_busy"]= False
             overall_state["just_started"]= False
-        # GPIO.output(vibration_motor_pin,GPIO.HIGH)
-        # time.sleep(10000)
-        # print("stop vibration")
-        # GPIO.output(vibration_motor_pin,GPIO.LOW)
-        # time.sleep(2000000)
-        # print(overall_state["music_busy"])
+        print("music busy: "+ str(overall_state["music_busy"])+" bark: "+ str(overall_state["bark"])+" heartbeat: "+ str(overall_state["heartbeat"]))
         time.sleep(1)
 
 if __name__ == '__main__':
