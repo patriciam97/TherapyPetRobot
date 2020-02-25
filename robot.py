@@ -34,9 +34,8 @@ thread_state= {"main_running": False, "state_thread":None,"bark_thread":None,"le
 def handle_state():
     global overall_state, thread_state
     while thread_state["main_running"]:
-        secs = random.randint(50, 200)
+        secs = random.randint(60, 420) #1min to 7 mins
         if time.time()-overall_state["last_pet"]>secs and overall_state["state"]>1:
-            # every 20 second state drops
             overall_state["state"]-=1
             print("State dropped to "+str(overall_state["state"]))
         time.sleep(2)
@@ -51,16 +50,30 @@ def set_tail_angle(angle):
 def move_tail():
     global overall_state,thread_state
     randtime = random.randint(4,10)
-    # overall_state["music_busy"]=not overall_state["music_busy"]
     overall_state["tail_moves"] = True
     while (thread_state["main_running"] and randtime > 0):
-        print(randtime)
-        # overall_state["touchstatus"] = not overall_state["touchstatus"]
         set_tail_angle(90 if overall_state["tail_alternate"] else 0)
-        # set_tail_angle(10 if overall_state["tail_alternate"] else 90)
         overall_state["tail_alternate"]= not overall_state["tail_alternate"]
         randtime-=1
         time.sleep(0.5)
+        # servo_position = 0 if overall_state["tail_alternate"] else 180
+        # target = 90 if overall_state["tail_alternate"] else 0
+        # speed = 5
+        # while(True):
+        #     if(servo_position < target):
+        #         servo_position += speed
+        #     if(servo_position > target):
+        #         servo_position -= speed
+        #     if(abs(servo_position - target)<speed):
+        #         continue
+        #     set_tail_angle(servo_position)
+        #     time.sleep(0.2)
+        
+        # print(randtime)
+        # set_tail_angle(90 if overall_state["tail_alternate"] else 0)
+        # overall_state["tail_alternate"]= not overall_state["tail_alternate"]
+        # randtime-=1
+        # time.sleep(0.5)
     overall_state["last_tail_moved"] = time.time()
     overall_state["music_busy"] = False
     overall_state["bark"] = False
@@ -74,7 +87,7 @@ def automatic_tail():
             continue
         if (time.time() - overall_state["last_pet"] > 60) and (overall_state["bark"]==False and overall_state["heartbeat"]==False ):
             bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.8,0.2])
-            print(bark_sound_probability)
+            print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
                 overall_state["bark"]= True
                 overall_state["heartbeat"]= False
@@ -83,18 +96,18 @@ def automatic_tail():
                 overall_state["heartbeat"]= True
                 overall_state["bark"]= False
         time.sleep(0.2)
-        print("Waiting...")
+        # print("Waiting...")
 
 def read_left_touchsensor():
     global overall_state,left_capacitive_touch_sensor_pin, thread_state
     while thread_state["main_running"]:
         if (GPIO.input(left_capacitive_touch_sensor_pin) and overall_state["bark"]==False and overall_state["heartbeat"]==False ):
-            print("touched")
+            print("Left hand touch sensor: Enabled")
             if overall_state["state"]<6 and time.time() - overall_state["last_tail_moved"]>2:
                 print("State increased to "+str(overall_state["state"]))
                 overall_state["state"]+=1
             bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.7,0.3])
-            print(bark_sound_probability)
+            print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
                 overall_state["bark"]= True
                 overall_state["heartbeat"]= False
@@ -108,13 +121,12 @@ def read_right_touchsensor():
     global overall_state,right_capacitive_touch_sensor_pin, thread_state,vibration_motor_pin
     while thread_state["main_running"]:
         if (GPIO.input(right_capacitive_touch_sensor_pin) and overall_state["bark"]==False and overall_state["heartbeat"]==False ):
-            # and  overall_state["bark"]==False not overall_state["heartbeat"]==False
-            print("touched")
+            print("Right hand touch sensor: Enabled")
             if overall_state["state"]<6 and time.time() - overall_state["last_tail_moved"]>2:
                 print("State increased to "+str(overall_state["state"]))
                 overall_state["state"]+=1
             bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.7,0.3])
-            print(bark_sound_probability)
+            print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
                 overall_state["bark"]= True
                 overall_state["heartbeat"]= False
