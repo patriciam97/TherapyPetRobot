@@ -28,9 +28,9 @@ GPIO.output(vibration_motor_pin,GPIO.LOW)
 p = GPIO.PWM(servo_motor_pin, 50)     # Sets up pin 11 as a PWM pin
 p.start(0)                  # Starts running PWM on the pin and sets it to 0
 
-overall_state = {"just_started":True,"state":0,"tail_moves": False, "last_pet":time.time(),"last_tail_moved": time.time(), "touchstatus":False, "tail_alternate": False, "motor": p,"music_busy":False,"music_writing":None,"last_bark":time.time(),"bark":False,"heartbeat":False}
+overall_state = {"just_started":True,"state":0,"tail_moves": False,"tail_angle":0, "last_pet":time.time(),"last_tail_moved": time.time(), "touchstatus":False, "tail_alternate": False, "motor": p,"music_busy":False,"music_writing":None,"last_bark":time.time(),"bark":False,"heartbeat":False}
 thread_state= {"main_running": False, "state_thread":None,"bark_thread":None,"left_touch_sensor_thread":None,"right_touch_sensor_thread":None}
-
+tail_movement= [15,18,22.5,30,45,90]
 def handle_state():
     global overall_state, thread_state
     while thread_state["main_running"]:
@@ -45,17 +45,35 @@ def set_tail_angle(angle):
     global overall_state
     duty = angle / 18 + 2
     overall_state["motor"].ChangeDutyCycle(duty)
-    sleep(0.5)
+    overall_state["tail_alternate"] = angle
+    # sleep(0.5)
 
 def move_tail():
-    global overall_state,thread_state
+    global overall_state,thread_state, tail_movement
     randtime = random.randint(4,10)
     overall_state["tail_moves"] = True
+    print("State: "+ str(overall_state["state"]))
     while (thread_state["main_running"] and randtime > 0):
-        set_tail_angle(90 if overall_state["tail_alternate"] else 0)
+        servo_position = overall_state["tail_angle"]
+        target = 90 if overall_state["tail_alternate"] else 0
+        speed = tail_movement[int(overall_state["state"])-1]
+        while(servo_position!=target):
+            print("moving")
+            if(servo_position < target):
+                servo_position += speed
+            if(servo_position > target):
+                servo_position -= speed
+            if(abs(servo_position - target)<speed):
+                continue
+            set_tail_angle(servo_position)
+            time.sleep(0.1)
         overall_state["tail_alternate"]= not overall_state["tail_alternate"]
         randtime-=1
-        time.sleep(0.5)
+        
+        # set_tail_angle(90 if overall_state["tail_alternate"] else 0)
+        # overall_state["tail_alternate"]= not overall_state["tail_alternate"]
+        # randtime-=1
+        # time.sleep(0.5)
         # servo_position = 0 if overall_state["tail_alternate"] else 180
         # target = 90 if overall_state["tail_alternate"] else 0
         # speed = 5
@@ -86,7 +104,7 @@ def automatic_tail():
             time.sleep(1)
             continue
         if (time.time() - overall_state["last_pet"] > 60) and (overall_state["bark"]==False and overall_state["heartbeat"]==False ):
-            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.8,0.2])
+            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.9,0.1])
             print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
                 overall_state["bark"]= True
@@ -242,13 +260,16 @@ if __name__ == '__main__':
         contents = f.read()
         line1 = contents.split("\n")[0]
         line2 = contents.split("\n")[1]
+        line2 = contents.split("\n")[2]
         overall_state["state"]=int(line1.split(":")[1])
         overall_state["tail_alternate"]=bool(line2.split(":")[1])
+        overall_state["tail_angle"] = int(line1.split(":")[1])
         main()
     except KeyboardInterrupt:
         f= open("state.txt","w")
         f.write("state: "+str(overall_state["state"]))
         f.write("\ntail_alternate: "+str(overall_state["tail_alternate"]))
+        f.write("\ntail_angle: "+str(overall_state["tail_angle"]))
         f.close()
         overall_state["music_busy"] = False
         overall_state["bark"] = False
