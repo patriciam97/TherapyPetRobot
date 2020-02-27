@@ -62,8 +62,9 @@ def move_tail():
         # servo_position = 0
         target = 90 if overall_state["tail_alternate"] else 0
         speed = (abs(target - servo_position)) // int(tail_movement_steps[(overall_state["state"])])
-        # print(speed)
-        speed = 10
+        last_speed = (abs(target - servo_position)) % int(tail_movement_steps[(overall_state["state"])])
+        print(speed,last_speed)
+        # speed = 10
         print("moving from "+ str(servo_position) +" to "+str(target) +" step: "+str(speed))
         while( thread_state["main_running"] and servo_position!=target):
             if(servo_position <= target):
@@ -71,11 +72,12 @@ def move_tail():
             if(servo_position > target):
                 servo_position -= speed
             if(abs(servo_position - target)<speed):
-                continue
+                servo_position = target
             set_tail_angle(servo_position)
             time.sleep(0.09)
         print(randtime)
         randtime-=1
+        overall_state["tail_alternate"]= not overall_state["tail_alternate"]
         time.sleep(1)
     overall_state["last_tail_moved"] = time.time()
     overall_state["music_busy"] = False
@@ -89,7 +91,7 @@ def automatic_tail():
             time.sleep(1)
             continue
         if (time.time() - overall_state["last_pet"] > 60) and (overall_state["bark"]==False and overall_state["heartbeat"]==False ):
-            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.9,0.1])
+            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[1,0])
             print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
                 overall_state["bark"]= True
@@ -109,7 +111,7 @@ def read_left_touchsensor():
             if overall_state["state"]<6 and time.time() - overall_state["last_tail_moved"]>2:
                 print("State increased to "+str(overall_state["state"]))
                 overall_state["state"]+=1
-            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.8,0.2])
+            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[1,0])
             print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
                 overall_state["bark"]= True
@@ -128,7 +130,7 @@ def read_right_touchsensor():
             if overall_state["state"]<6 and time.time() - overall_state["last_tail_moved"]>2:
                 print("State increased to "+str(overall_state["state"]))
                 overall_state["state"]+=1
-            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.8,0.2])
+            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[1,0])
             print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
                 overall_state["bark"]= True
@@ -249,7 +251,7 @@ if __name__ == '__main__':
         overall_state["state"]=int(line1.split(":")[1])
         overall_state["tail_alternate"]=bool(line2.split(":")[1])
         overall_state["tail_angle"] = int(line1.split(":")[1])
-        set_tail_angle(0)
+        # set_tail_angle(0)
         main()
     except KeyboardInterrupt:
         f= open("state.txt","w")
