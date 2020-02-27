@@ -63,9 +63,9 @@ def move_tail():
         target = 90 if overall_state["tail_alternate"] else 0
         speed = (abs(target - servo_position)) // int(tail_movement_steps[(overall_state["state"])])
         last_speed = (abs(target - servo_position)) % int(tail_movement_steps[(overall_state["state"])])
-        print(speed,last_speed)
+        # print(speed,last_speed)
         # speed = 10
-        print("moving from "+ str(servo_position) +" to "+str(target) +" step: "+str(speed))
+        # print("moving from "+ str(servo_position) +" to "+str(target) +" step: "+str(speed))
         while( thread_state["main_running"] and servo_position!=target):
             if(servo_position <= target):
                 servo_position += speed
@@ -75,7 +75,7 @@ def move_tail():
                 servo_position = target
             set_tail_angle(servo_position)
             time.sleep(0.09)
-        print(randtime)
+        # print(randtime)
         randtime-=1
         overall_state["tail_alternate"]= not overall_state["tail_alternate"]
         time.sleep(1)
@@ -91,7 +91,7 @@ def automatic_tail():
             time.sleep(1)
             continue
         if (time.time() - overall_state["last_pet"] > 60) and (overall_state["bark"]==False and overall_state["heartbeat"]==False ):
-            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[1,0])
+            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.9,0.1])
             print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
                 overall_state["bark"]= True
@@ -111,7 +111,7 @@ def read_left_touchsensor():
             if overall_state["state"]<6 and time.time() - overall_state["last_tail_moved"]>2:
                 print("State increased to "+str(overall_state["state"]))
                 overall_state["state"]+=1
-            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[1,0])
+            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.9,0.1])
             print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
                 overall_state["bark"]= True
@@ -130,7 +130,7 @@ def read_right_touchsensor():
             if overall_state["state"]<6 and time.time() - overall_state["last_tail_moved"]>2:
                 print("State increased to "+str(overall_state["state"]))
                 overall_state["state"]+=1
-            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[1,0])
+            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.9,0.1])
             print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
                 overall_state["bark"]= True
@@ -186,23 +186,28 @@ def bark():
             overall_state['last_bark']=time.time()
             overall_state["music_busy"] = True
             current_state = overall_state["state"]
-            title = "/home/pi/Documents/TherapyPetRobot/sounds/new/sound_"+str(overall_state["state"])+".wav"
-            a = pygame.mixer.Sound(title)
-            pygame.mixer.Sound.play(a,fade_ms=800)
-            pygame.mixer.music.fadeout(100)
-            new_barks_thread = threading.Thread(target=handle_barks,args=(current_state,))
-            new_barks_thread.start()
-            pygame.mixer.music.set_volume(1)
-            if (a.get_length()>3):
-                sleep_counter = random.randint(3, int(a.get_length()))
-            else:
-                sleep_counter = 3
-            print(sleep_counter)
-            time.sleep(sleep_counter)
-            print("DONE")
-            overall_state["music_busy"] = False
-            overall_state["bark"] = False
-            overall_state["tail_moves"] = False
+            try:
+                title = "/home/pi/Documents/TherapyPetRobot/sounds/new/sound_"+str(overall_state["state"])+".wav"
+                a = pygame.mixer.Sound(title)
+                pygame.mixer.Sound.play(a,fade_ms=800)
+                pygame.mixer.music.fadeout(300)
+                new_barks_thread = threading.Thread(target=handle_barks,args=(current_state,))
+                new_barks_thread.start()
+                pygame.mixer.music.set_volume(1)
+                if (a.get_length()>3):
+                    sleep_counter = random.randint(3, int(a.get_length()))
+                else:
+                    sleep_counter = 3
+                print(sleep_counter)
+                time.sleep(sleep_counter)
+                print("DONE")
+                overall_state["music_busy"] = False
+                overall_state["bark"] = False
+                overall_state["tail_moves"] = False
+            except:
+                for state in range(7):
+                    get_sound2.get_new_sound(state)
+
 def main():
     global thread_state
     thread_state["main_running"] = True
