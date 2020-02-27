@@ -7,9 +7,9 @@
     Generate the initial sounds by running 
     $ python generate_new_sounds.py
 
-## Step 2 :
+## Step 3 :
     Connect all GPIO pins to pi
 
-## Step 2 :
+## Step 4 :
     Run robot code
     $ python robot.py
