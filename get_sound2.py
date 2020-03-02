@@ -11,7 +11,7 @@ sampling_rate_scared, audio_scared = wavfile.read('/home/pi/Documents/TherapyPet
 
 def get_random(audio,status):
     length = len(audio)
-    min_duration = 200000
+    min_duration = 300000
     if status>=5:
         min_duration = 500000  
     start = random.randint(0, length)
@@ -37,7 +37,7 @@ def create_sound(sound,status):
     mapping = {
         0 : 1,
         1 : 1.2,
-        2:  8,
+        2:  5,
         3 : 3,
         4 : 1,
         5 : 0.9,

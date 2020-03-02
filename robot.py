@@ -28,7 +28,7 @@ GPIO.output(vibration_motor_pin,GPIO.LOW)
 p = GPIO.PWM(servo_motor_pin, 50)     # Sets up pin 11 as a PWM pin
 p.start(0)                  # Starts running PWM on the pin and sets it to 0
 
-overall_state = {"just_started":True,"state":0,"tail_moves": False,"tail_angle":0, "last_pet":time.time(),"last_tail_moved": time.time(), "touchstatus":False, "tail_alternate": False, "motor": p,"music_busy":False,"music_writing":None,"last_bark":time.time(),"bark":False,"heartbeat":False,"touch_counter":random.randint(2,6)}
+overall_state = {"just_started":True,"state":0,"tail_moves": False,"tail_angle":0, "last_pet":time.time(),"last_tail_moved": time.time(), "touchstatus":False, "tail_alternate": False, "motor": p,"music_busy":False,"music_writing":None,"last_bark":time.time(),"bark":False,"heartbeat":False,"touch_counter":1}
 thread_state= {"main_running": False, "state_thread":None,"bark_thread":None,"left_touch_sensor_thread":None,"right_touch_sensor_thread":None}
 tail_movement_steps= [6,5,4,3,2,1,1]
 def handle_state():
@@ -194,7 +194,7 @@ def bark():
                 title = "/home/pi/Documents/TherapyPetRobot/sounds/new/sound_"+str(overall_state["state"])+".wav"
                 a = pygame.mixer.Sound(title)
                 pygame.mixer.Sound.play(a,fade_ms=2000)
-                pygame.mixer.music.fadeout(1000)
+                pygame.mixer.music.fadeout(2000)
                 new_barks_thread = threading.Thread(target=handle_barks,args=(current_state,))
                 new_barks_thread.start()
                 pygame.mixer.music.set_volume(1)
