@@ -40,13 +40,13 @@ def create_sound(sound,status):
         2:  8,
         3 : 3,
         4 : 1,
-        5 : 1,
-        6 : 1,
+        5 : 0.9,
+        6 : 0.6,
     }
     level = mapping[status]
     y = sound[:, 1]
     if status == 5:
-        y = get_interval_array_elems(y,30)
+        y = get_interval_array_elems(y,20)
     elif status == 6:
         y = get_interval_array_elems(y,10)
     # print(time.time() - prev)
