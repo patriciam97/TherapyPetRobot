@@ -91,7 +91,7 @@ def automatic_tail():
             time.sleep(1)
             continue
         if (time.time() - overall_state["last_pet"] > 60) and (overall_state["bark"]==False and overall_state["heartbeat"]==False ):
-            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.9,0.1])
+            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.8,0.2])
             print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
                 overall_state["bark"]= True
@@ -100,6 +100,7 @@ def automatic_tail():
             else:
                 overall_state["heartbeat"]= True
                 overall_state["bark"]= False
+                overall_state["last_pet"] = time.time()
         time.sleep(0.2)
         # print("Waiting...")
 
@@ -112,7 +113,7 @@ def read_left_touchsensor():
                 print("State increased to "+str(overall_state["state"]))
                 overall_state["state"]+=1
                 overall_state["touch_counter"] = random.randint(3,9)
-            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.9,0.1])
+            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.8,0.2])
             print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
                 overall_state["bark"]= True
@@ -133,7 +134,7 @@ def read_right_touchsensor():
                 print("State increased to "+str(overall_state["state"]))
                 overall_state["state"]+=1
                 overall_state["touch_counter"] = random.randint(3,9)
-            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.9,0.1])
+            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.8,0.2])
             print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
                 overall_state["bark"]= True
