@@ -25,7 +25,7 @@ GPIO.setup(vibration_motor_pin,GPIO.OUT)
 GPIO.output(vibration_motor_pin,GPIO.LOW)
 
 
-p = GPIO.PWM(servo_motor_pin, 50)     # Sets up pin 11 as a PWM pin
+p = GPIO.PWM(servo_motor_pin, 40)     # Sets up pin 11 as a PWM pin
 p.start(0)                  # Starts running PWM on the pin and sets it to 0
 
 overall_state = {"just_started":True,"state":0,"tail_moves": False,"tail_angle":0, "last_pet":time.time(),"last_tail_moved": time.time(), "touchstatus":False, "tail_alternate": False, "motor": p,"music_busy":False,"music_writing":None,"last_bark":time.time(),"bark":False,"heartbeat":False,"touch_counter":1}
@@ -44,9 +44,12 @@ def handle_state():
 def set_tail_angle(angle):
     global overall_state
     duty = angle / 18 + 2
+    # if overall_state["state"] == 0:
+    #     overall_state["motor"].ChangeDutyCycle(3)
+    # else:
+    #     overall_state["motor"].ChangeDutyCycle(5+(10*overall_state["state"]))
     overall_state["motor"].ChangeDutyCycle(duty)
     overall_state["tail_angle"] = angle
-    # sleep(0.5)
 
 def move_tail():
     global overall_state,thread_state, tail_movement_steps
@@ -54,31 +57,11 @@ def move_tail():
     overall_state["tail_moves"] = True
     print("State: "+ str(overall_state["state"]))
     while (thread_state["main_running"] and randtime > 0):
-        # set_tail_angle(90 if overall_state["tail_alternate"] else 0)
-        # overall_state["tail_alternate"]= not overall_state["tail_alternate"]
-        # randtime-=1
-        # time.sleep(0.5)
-        servo_position = overall_state["tail_angle"]
-        # servo_position = 0
-        target = 110 if overall_state["tail_alternate"] else 0
-        speed = (abs(target - servo_position)) // int(tail_movement_steps[(overall_state["state"])])
-        last_speed = (abs(target - servo_position)) % int(tail_movement_steps[(overall_state["state"])])
-        # print(speed,last_speed)
-        # speed = 10
-        # print("moving from "+ str(servo_position) +" to "+str(target) +" step: "+str(speed))
-        while( thread_state["main_running"] and servo_position!=target):
-            if(servo_position <= target):
-                servo_position += speed
-            if(servo_position > target):
-                servo_position -= speed
-            if(abs(servo_position - target)<speed):
-                servo_position = target
-            set_tail_angle(servo_position)
-            time.sleep(0.001)
-        # print(randtime)
-        randtime-=1
+        set_tail_angle(100 if overall_state["tail_alternate"] else 0)
         overall_state["tail_alternate"]= not overall_state["tail_alternate"]
-        time.sleep(1)
+        randtime-=1
+        servo_position = overall_state["tail_angle"]
+        time.sleep(0.7)
     overall_state["last_tail_moved"] = time.time()
     overall_state["music_busy"] = False
     overall_state["bark"] = False
@@ -91,58 +74,72 @@ def automatic_tail():
             time.sleep(1)
             continue
         if (time.time() - overall_state["last_pet"] > 60) and (overall_state["bark"]==False and overall_state["heartbeat"]==False ):
-            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.8,0.2])
+            overall_state["heartbeat"] = False
+            overall_state["bark"] = False
+            time.sleep(0.5)
+            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.9,0.1])
             print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
-                overall_state["bark"]= True
                 overall_state["heartbeat"]= False
+                time.sleep(0.5)
+                overall_state["bark"]= True
                 move_tail()
             else:
-                overall_state["heartbeat"]= True
                 overall_state["bark"]= False
-                overall_state["last_pet"] = time.time()
+                time.sleep(0.5)
+                overall_state["heartbeat"]= True
         time.sleep(0.2)
         # print("Waiting...")
 
 def read_left_touchsensor():
     global overall_state,left_capacitive_touch_sensor_pin, thread_state
     while thread_state["main_running"]:
-        if (GPIO.input(left_capacitive_touch_sensor_pin) and overall_state["bark"]==False and overall_state["heartbeat"]==False ):
+        if not GPIO.input(right_capacitive_touch_sensor_pin) and (GPIO.input(left_capacitive_touch_sensor_pin) and overall_state["bark"]==False and overall_state["heartbeat"]==False ):
+            overall_state["heartbeat"] = False
+            overall_state["bark"] = False
+            time.sleep(0.5)
             print("Left hand touch sensor: Enabled")
             if overall_state["state"]<6 and overall_state["touch_counter"]==0:
                 print("State increased to "+str(overall_state["state"]))
                 overall_state["state"]+=1
                 overall_state["touch_counter"] = random.randint(3,9)
-            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.8,0.2])
+            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.9,0.1])
             print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
-                overall_state["bark"]= True
                 overall_state["heartbeat"]= False
+                time.sleep(0.5)
+                overall_state["bark"]= True
                 move_tail()
             else:
-                overall_state["heartbeat"]= True
                 overall_state["bark"]= False
+                time.sleep(0.5)
+                overall_state["heartbeat"]= True
             overall_state["touch_counter"]-=1
         time.sleep(0.2)
 
 def read_right_touchsensor():
     global overall_state,right_capacitive_touch_sensor_pin, thread_state,vibration_motor_pin
     while thread_state["main_running"]:
-        if (GPIO.input(right_capacitive_touch_sensor_pin) and overall_state["bark"]==False and overall_state["heartbeat"]==False ):
+        if not GPIO.input(left_capacitive_touch_sensor_pin) and (GPIO.input(right_capacitive_touch_sensor_pin) and overall_state["bark"]==False and overall_state["heartbeat"]==False ):
+            overall_state["heartbeat"] = False
+            overall_state["bark"] = False
+            time.sleep(0.5)
             print("Right hand touch sensor: Enabled")
             if overall_state["state"]<6 and overall_state["touch_counter"]==0:
                 print("State increased to "+str(overall_state["state"]))
                 overall_state["state"]+=1
                 overall_state["touch_counter"] = random.randint(3,9)
-            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.8,0.2])
+            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.9,0.1])
             print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
-                overall_state["bark"]= True
                 overall_state["heartbeat"]= False
+                time.sleep(0.5)
+                overall_state["bark"]= True
                 move_tail()
             else:
-                overall_state["heartbeat"]= True
                 overall_state["bark"]= False
+                time.sleep(0.5)
+                overall_state["heartbeat"]= True
             overall_state["touch_counter"]-=1
         time.sleep(0.2)
 
@@ -157,6 +154,7 @@ def heartbeat_vibration():
     global overall_state, thread_state
     while thread_state["main_running"]:
         if (overall_state["heartbeat"]):
+            print("here")
             time.sleep(0.05)
             GPIO.output(vibration_motor_pin,GPIO.HIGH)
             time.sleep(0.40)
@@ -194,8 +192,8 @@ def bark():
             try:
                 title = "/home/pi/Documents/TherapyPetRobot/sounds/new/sound_"+str(overall_state["state"])+".wav"
                 a = pygame.mixer.Sound(title)
-                pygame.mixer.Sound.play(a,fade_ms=2000)
-                pygame.mixer.music.fadeout(2000)
+                pygame.mixer.Sound.play(a,fade_ms=3000)
+                pygame.mixer.music.fadeout(3000)
                 new_barks_thread = threading.Thread(target=handle_barks,args=(current_state,))
                 new_barks_thread.start()
                 pygame.mixer.music.set_volume(1)
@@ -262,7 +260,11 @@ if __name__ == '__main__':
         overall_state["tail_alternate"]=bool(line2.split(":")[1])
         overall_state["tail_angle"] = int(line1.split(":")[1])
         # set_tail_angle(0)
-        # time.sleep(3)
+        # time.sleep(2)
+        # set_tail_angle(90)
+        # time.sleep(2)
+        # set_tail_angle(-30)
+        # time.sleep(2)
         main()
     except KeyboardInterrupt:
         f= open("state.txt","w")
