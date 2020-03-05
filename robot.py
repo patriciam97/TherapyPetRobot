@@ -57,11 +57,11 @@ def move_tail():
     overall_state["tail_moves"] = True
     print("State: "+ str(overall_state["state"]))
     while (thread_state["main_running"] and randtime > 0):
-        set_tail_angle(100 if overall_state["tail_alternate"] else 0)
+        set_tail_angle(120 if overall_state["tail_alternate"] else 0)
         overall_state["tail_alternate"]= not overall_state["tail_alternate"]
         randtime-=1
         servo_position = overall_state["tail_angle"]
-        time.sleep(0.7)
+        time.sleep(0.5)
     overall_state["last_tail_moved"] = time.time()
     overall_state["music_busy"] = False
     overall_state["bark"] = False
@@ -73,7 +73,7 @@ def automatic_tail():
         if overall_state["tail_moves"]:
             time.sleep(1)
             continue
-        if (time.time() - overall_state["last_pet"] > 60) and (overall_state["bark"]==False and overall_state["heartbeat"]==False ):
+        if (time.time() - overall_state["last_pet"] > 120) and (overall_state["bark"]==False and overall_state["heartbeat"]==False ):
             overall_state["heartbeat"] = False
             overall_state["bark"] = False
             time.sleep(0.5)
@@ -259,12 +259,12 @@ if __name__ == '__main__':
         overall_state["state"]=int(line1.split(":")[1])
         overall_state["tail_alternate"]=bool(line2.split(":")[1])
         overall_state["tail_angle"] = int(line1.split(":")[1])
-        # set_tail_angle(0)
-        # time.sleep(2)
-        # set_tail_angle(90)
-        # time.sleep(2)
-        # set_tail_angle(-30)
-        # time.sleep(2)
+        # while True:
+        #     set_tail_angle(0)
+        #     time.sleep(1)
+        #     set_tail_angle(120)
+        #     time.sleep(1)
+
         main()
     except KeyboardInterrupt:
         f= open("state.txt","w")
