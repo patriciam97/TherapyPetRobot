@@ -6,11 +6,11 @@ import time
 import numpy as np
 
 sampling_rate_normal, audio_normal = wavfile.read(
-    '/Users/patriciamilou/Documents/Github/TherapyPetRobot/sounds/labrador-barking-daniel_simon.wav')
-# '/home/pi/Documents/TherapyPetRobot/sounds/labrador-barking-daniel_simon.wav')
+    # '/Users/patriciamilou/Documents/Github/TherapyPetRobot/sounds/labrador-barking-daniel_simon.wav')
+'/home/pi/Documents/TherapyPetRobot/sounds/labrador-barking-daniel_simon.wav')
 sampling_rate_scared, audio_scared = wavfile.read(
-    '/Users/patriciamilou/Documents/Github/TherapyPetRobot/sounds/crying_dog.wav')
-# '/home/pi/Documents/TherapyPetRobot/sounds/crying_dog.wav')
+    # '/Users/patriciamilou/Documents/Github/TherapyPetRobot/sounds/crying_dog.wav')
+'/home/pi/Documents/TherapyPetRobot/sounds/crying_dog.wav')
 #
 # sampling_rate_normal, audio_normal = wavfile.read('sounds/labrador-barking-daniel_simon.wav')
 # sampling_rate_scared, audio_scared = wavfile.read('sounds/crying_dog.wav')
@@ -37,7 +37,7 @@ def get_interval_array_elems(sound, interval):
 
 def create_sound(sound, status):
     prev = time.time()
-    title = '/Users/patriciamilou/Documents/Github/TherapyPetRobot/soundsound_' + \
+    title = 'sounds/new/sound_' + \
         str(status)+'.wav'
     # title = 'sounds/new/sound_'+str(status)+'.wav'
     noise_output = wave.open(title, 'wb')

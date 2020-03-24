@@ -28,7 +28,7 @@ GPIO.output(vibration_motor_pin,GPIO.LOW)
 p = GPIO.PWM(servo_motor_pin, 50)     # Sets up pin 11 as a PWM pin
 p.start(0)                  # Starts running PWM on the pin and sets it to 0
 
-overall_state = {"just_started":True,"state":0,"tail_moves": False,"tail_angle":0, "last_pet":time.time(),"last_tail_moved": time.time(), "touchstatus":False, "tail_alternate": False, "motor": p,"music_busy":False,"music_writing":None,"last_bark":time.time(),"bark":False,"heartbeat":False,"touch_counter":1}
+overall_state = {"just_started":True,"state":0,"tail_moves": False,"tail_angle":0, "last_pet":time.time(),"last_tail_moved": time.time(), "touchstatus":False, "tail_alternate": False, "motor": p,"music_busy":False,"music_writing":None,"last_bark":time.time(),"bark":False,"heartbeat":False,"touch_counter":2}
 thread_state= {"main_running": False, "state_thread":None,"bark_thread":None,"left_touch_sensor_thread":None,"right_touch_sensor_thread":None}
 tail_movement_steps= [6,5,4,3,2,1,1]
 def handle_state():
@@ -77,11 +77,11 @@ def automatic_tail():
         if overall_state["tail_moves"]:
             time.sleep(1)
             continue
-        if (time.time() - overall_state["last_pet"] > 120) and (overall_state["bark"]==False and overall_state["heartbeat"]==False ):
+        if (time.time() - overall_state["last_pet"] > 50) and (overall_state["bark"]==False and overall_state["heartbeat"]==False ):
             overall_state["heartbeat"] = False
             overall_state["bark"] = False
             time.sleep(0.5)
-            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.9,0.1])
+            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.8,0.2])
             print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
                 overall_state["heartbeat"]= False
@@ -107,7 +107,7 @@ def read_left_touchsensor():
                 print("State increased to "+str(overall_state["state"]))
                 overall_state["state"]+=1
                 overall_state["touch_counter"] = random.randint(1,3)
-            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.9,0.1])
+            bark_sound_probability = np.random.choice(["bark","heartbeat"],p=[0.8,0.2])
             print("Starting : "+bark_sound_probability)
             if (bark_sound_probability == "bark"):
                 overall_state["heartbeat"]= False

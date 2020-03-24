@@ -110,13 +110,13 @@ class Robot:
         return self.last_tail_moved
 
     def set_music_busy(self, value):
-        self.speaker = False
+        self.speaker_busy = value
 
-    def get_music_busy(self, value):
-        return self.speaker
+    def get_music_busy(self):
+        return self.speaker_busy
 
     def set_bark_busy(self, value):
-        self.bark_busy = False
+        self.bark_busy = value
 
     def get_bark_busy(self):
         return self.bark_busy
@@ -161,7 +161,7 @@ class Robot:
                 continue
             if (time.time() - self.get_last_pet() > 120) and (self.get_bark_busy() == False and self.get_heartbeat_busy() == False):
                 self.set_heartbeat_busy(False)
-                self.bark_busy(False)
+                self.set_bark_busy(False)
                 time.sleep(0.5)
                 bark_sound_probability = np.random.choice(
                     ["bark", "heartbeat"], p=[0.9, 0.1])
@@ -180,6 +180,7 @@ class Robot:
 
 if __name__ == '__main__':
     try:
+        pygame.mixer.init()
         f = open("state.txt", "r")
         contents = f.read()
         tail_alt = contents.split("\n")[1]
