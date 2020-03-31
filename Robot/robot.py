@@ -182,16 +182,16 @@ class Robot:
 if __name__ == '__main__':
     try:
         pygame.mixer.init()
-        if str(sys.argv)[0] == "read":
+        if str(sys.argv)[0] == "init":
+            state = 0
+            tail_alt = True
+            tail_angle = 0
+        else:
             f = open("state.txt", "r")
             contents = f.read()
             state = contents.split("\n")[0]
             tail_alt = contents.split("\n")[1]
             tail_angle = contents.split("\n")[2]
-        else:
-            state = 0
-            tail_alt = True
-            tail_angle = 0
         robot = Robot(int(state), int(tail_angle.split(":")[1]), bool(
             tail_alt.split(":")[1]))
         actuators = Actuators(vibration_motor_pin, servo_motor, robot)
