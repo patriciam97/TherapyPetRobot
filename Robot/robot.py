@@ -41,8 +41,8 @@ thread_state = {"automatic_thread": None, "state_thread": None, "bark_thread": N
 
 class Robot:
 
-    def __init__(self, tail_angle, tail_alternate):
-        self.state = 0
+    def __init__(self, state, tail_angle, tail_alternate):
+        self.state = state
         self.tail_angle = tail_angle
         self.tail_moves = False
         self.tail_alternate = tail_alternate
@@ -185,12 +185,14 @@ if __name__ == '__main__':
         if str(sys.argv)[0] == "read":
             f = open("state.txt", "r")
             contents = f.read()
+            state = contents.split("\n")[0]
             tail_alt = contents.split("\n")[1]
             tail_angle = contents.split("\n")[2]
         else:
+            state = 0
             tail_alt = True
             tail_angle = 0
-        robot = Robot(int(tail_angle.split(":")[1]), bool(
+        robot = Robot(int(state), int(tail_angle.split(":")[1]), bool(
             tail_alt.split(":")[1]))
         actuators = Actuators(vibration_motor_pin, servo_motor, robot)
         sensors = Sensors(left_capacitive_touch_sensor_pin,
