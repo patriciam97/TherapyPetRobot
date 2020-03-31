@@ -1,3 +1,4 @@
+import sys
 import RPi.GPIO as GPIO
 import pygame
 import time
@@ -181,10 +182,14 @@ class Robot:
 if __name__ == '__main__':
     try:
         pygame.mixer.init()
-        f = open("state.txt", "r")
-        contents = f.read()
-        tail_alt = contents.split("\n")[1]
-        tail_angle = contents.split("\n")[2]
+        if str(sys.argv)[0] == "read":
+            f = open("state.txt", "r")
+            contents = f.read()
+            tail_alt = contents.split("\n")[1]
+            tail_angle = contents.split("\n")[2]
+        else:
+            tail_alt = True
+            tail_angle = 0
         robot = Robot(int(tail_angle.split(":")[1]), bool(
             tail_alt.split(":")[1]))
         actuators = Actuators(vibration_motor_pin, servo_motor, robot)
